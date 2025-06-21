@@ -7,3 +7,4 @@ langchain-google-genai
 chromadb
 PyPDF2
 pypdf
+gunicorn
