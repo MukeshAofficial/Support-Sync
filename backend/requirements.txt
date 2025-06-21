@@ -7,4 +7,8 @@ langchain-google-genai
 chromadb
 PyPDF2
 pypdf
+<<<<<<< HEAD
 gunicorn
+=======
+gunicorn
+>>>>>>> 8c315ffcb39fd6c5d1ad5a61257239ac12590ed6
