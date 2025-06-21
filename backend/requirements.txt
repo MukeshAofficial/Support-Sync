@@ -1,0 +1,9 @@
+Flask
+Flask-Cors
+python-dotenv
+langchain
+langchain-community
+langchain-google-genai
+chromadb
+PyPDF2
+pypdf
