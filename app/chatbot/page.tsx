@@ -67,54 +67,33 @@ export default function ChatbotPage() {
     setInputMessage("")
     setIsTyping(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: userMessage.content }),
+      })
+      const data = await res.json()
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: "bot",
-        content: generateBotResponse(inputMessage, selectedLanguage),
+        content: data.answer || "Sorry, I don't have the answer to that.",
         timestamp: new Date(),
         language: selectedLanguage,
       }
       setMessages((prev) => [...prev, botResponse])
+    } catch (err) {
+      const botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        type: "bot",
+        content: "Sorry, there was an error connecting to the backend.",
+        timestamp: new Date(),
+        language: selectedLanguage,
+      }
+      setMessages((prev) => [...prev, botResponse])
+    } finally {
       setIsTyping(false)
-    }, 1500)
-  }
-
-  const generateBotResponse = (userInput: string, language: string): string => {
-    const responses = {
-      en: [
-        "I understand your question. Let me help you with that.",
-        "Based on our knowledge base, here's what I found...",
-        "That's a great question! Here's the information you need:",
-        "I can help you with that. Let me provide you with the details.",
-        "Thank you for reaching out. Here's the solution to your query:",
-      ],
-      es: [
-        "Entiendo tu pregunta. Permíteme ayudarte con eso.",
-        "Basado en nuestra base de conocimientos, esto es lo que encontré...",
-        "¡Esa es una gran pregunta! Aquí está la información que necesitas:",
-        "Puedo ayudarte con eso. Permíteme proporcionarte los detalles.",
-        "Gracias por contactarnos. Aquí está la solución a tu consulta:",
-      ],
-      fr: [
-        "Je comprends votre question. Laissez-moi vous aider avec cela.",
-        "Basé sur notre base de connaissances, voici ce que j'ai trouvé...",
-        "C'est une excellente question ! Voici les informations dont vous avez besoin :",
-        "Je peux vous aider avec cela. Laissez-moi vous fournir les détails.",
-        "Merci de nous avoir contactés. Voici la solution à votre requête :",
-      ],
-      hi: [
-        "मैं आपका प्रश्न समझ गया हूं। मुझे इसमें आपकी मदद करने दें।",
-        "हमारे ज्ञान आधार के अनुसार, यह है जो मुझे मिला...",
-        "यह एक बेहतरीन प्रश्न है! यहां वह जानकारी है जिसकी आपको आवश्यकता है:",
-        "मैं इसमें आपकी मदद कर सकता हूं। मुझे आपको विवरण प्रदान करने दें।",
-        "संपर्क करने के लिए धन्यवाद। यहां आपकी क्वेरी का समाधान है:",
-      ],
     }
-
-    const langResponses = responses[language as keyof typeof responses] || responses.en
-    return langResponses[Math.floor(Math.random() * langResponses.length)]
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

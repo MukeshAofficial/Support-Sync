@@ -22,44 +22,42 @@ export default function KnowledgeBasePage() {
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
+  const uploadFile = async (file: File, fileId: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      setFiles((prev) => prev.map((f) => f.id === fileId ? { ...f, status: 'uploading', progress: 30 } : f));
+      const res = await fetch('http://127.0.0.1:5000/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        setFiles((prev) => prev.map((f) => f.id === fileId ? { ...f, status: 'completed', progress: 100 } : f));
+      } else {
+        setFiles((prev) => prev.map((f) => f.id === fileId ? { ...f, status: 'error', progress: 100 } : f));
+      }
+    } catch (err) {
+      setFiles((prev) => prev.map((f) => f.id === fileId ? { ...f, status: 'error', progress: 100 } : f));
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: UploadedFile[] = acceptedFiles.map((file) => ({
       id: Math.random().toString(36).substr(2, 9),
       name: file.name,
       size: file.size,
-      status: "uploading",
+      status: 'uploading',
       progress: 0,
       type: file.type,
     }))
-
     setFiles((prev) => [...prev, ...newFiles])
     setIsUploading(true)
-
-    // Simulate upload process
-    newFiles.forEach((file) => {
-      simulateUpload(file.id)
+    newFiles.forEach((file, idx) => {
+      uploadFile(acceptedFiles[idx], file.id)
     })
   }, [])
-
-  const simulateUpload = (fileId: string) => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += Math.random() * 30
-      if (progress >= 100) {
-        progress = 100
-        clearInterval(interval)
-        setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "processing", progress: 100 } : f)))
-
-        // Simulate processing
-        setTimeout(() => {
-          setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "completed" } : f)))
-          setIsUploading(false)
-        }, 2000)
-      } else {
-        setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, progress } : f)))
-      }
-    }, 500)
-  }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
